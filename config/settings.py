@@ -5,6 +5,8 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import dj_database_url
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,12 +16,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tp&9+@-ofuq*e+viklh828gac-e!-ndcf=ix+s&#gy8aa)xw!='
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -32,6 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    "cloudinary",
+    "cloudinary_storage",
     
     # 'dj_celery_panel',
     'dj_redis_panel',
@@ -93,25 +98,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# for production ---
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv("DATABASE_NAME"),
-#         "USER": os.getenv("DB_USERNAME"),
-#         "PASSWORD": os.getenv("DB_PASSWORD"),
-#         "HOST": os.getenv("DB_HOST"),
-#         "PORT": os.getenv("DB_PORT"),
-#     }
-# }
+# for production using neon psql serverless db
+DATABASES={
+    "default": dj_database_url.parse(os.environ["DATABASE_URL"],
+                                     conn_max_age=600,
+                                      ssl_require=True),
+}
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLODINARY_SECRECT_KEY"),
+)
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # for development---
-DATABASES={
-    'default':{
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES={
+#     'default':{
+#          'ENGINE': 'django.db.backends.sqlite3',
+#          'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 REST_FRAMEWORK ={
     "DEFAULT_AUTHENTICATION_CLASSES":(
@@ -123,7 +131,7 @@ REST_FRAMEWORK ={
 }
 
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME':timedelta(days=2),
 }
 CORS_ALLOWED_ORIGINS = [
