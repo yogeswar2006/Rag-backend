@@ -21,7 +21,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["rag-backend-pcij.onrender.com"]
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -135,12 +135,19 @@ SIMPLE_JWT={
     'REFRESH_TOKEN_LIFETIME':timedelta(days=2),
 }
 CORS_ALLOWED_ORIGINS = [
+    'https://rag-backend-pcij.onrender.com',
     "http://localhost:5173",  # your React app
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://rag-backend-pcij.onrender.com',
     "http://localhost:5173",
 ]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 
